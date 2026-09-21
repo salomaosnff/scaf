@@ -163,6 +163,16 @@ export async function scaffold<Context extends ScaffoldContext = ScaffoldContext
 
     function finish() {
         const relativeFolder = relative(baseCwd, ctx.folder);
+        const createdFiles = (ctx.createdFiles as string[] | undefined) ?? [];
+
+        if (createdFiles.length > 0) {
+            console.log(`\n📁 Arquivos gerados (${createdFiles.length}):\n`);
+            for (const file of createdFiles) {
+                const relFile = relative(baseCwd, file);
+                console.log(`  ✓ ${relFile}`);
+            }
+        }
+
         console.log('\nPronto! Para começar, execute:\n');
         if (relativeFolder) {
             console.log(`  cd ${relativeFolder}`);

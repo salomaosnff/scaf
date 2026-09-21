@@ -22,6 +22,8 @@ export interface ScaffoldContext {
     renderFolder: string;
     /** Gerenciador de dependências acumuladas. */
     dependencies: Dependencies;
+    /** Lista de caminhos absolutos dos arquivos criados durante a renderização. */
+    createdFiles?: string[];
     /** Propriedades adicionais arbitrárias inseridas durante a etapa de configuração. */
     [k: string]: unknown;
 }
@@ -50,8 +52,9 @@ export interface RenderContext<Context> {
      * Função para renderizar um padrão de arquivos do template no destino.
      * @param input - Padrão glob ou arquivo relativo a ser renderizado.
      * @param output - Pasta ou arquivo de destino relativo.
+     * @returns Promessa com a lista de caminhos absolutos dos arquivos gerados.
      */
-    render(input: string, output?: string): Promise<void>;
+    render(input: string, output?: string): Promise<string[] | void>;
 }
 
 /**

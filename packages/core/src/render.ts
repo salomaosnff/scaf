@@ -1,7 +1,7 @@
 import type { ScaffoldContext } from "@create-scaf/template";
 import ejs from 'ejs';
 import { cp, glob, mkdir, stat, writeFile } from "node:fs/promises";
-import { join, dirname, resolve } from 'node:path'
+import { join, dirname, resolve } from 'node:path';
 
 /**
  * Renderiza um arquivo de template EJS utilizando o contexto do scaffolding e salva no destino.
@@ -10,35 +10,22 @@ import { join, dirname, resolve } from 'node:path'
  * @param outputFilename - O caminho final do arquivo gerado.
  */
 async function renderFile(context: ScaffoldContext, templateFile: string, outputFilename: string) {
-    const rendered = await ejs.renderFile(templateFile, context)
+    const rendered = await ejs.renderFile(templateFile, context);
     if (rendered.trim() === '') {
-        return
+        return;
     }
-    await mkdir(dirname(outputFilename), { recursive: true })
-    await writeFile(outputFilename, rendered)
+    await mkdir(dirname(outputFilename), { recursive: true });
+    await writeFile(outputFilename, rendered);
 }
 
 /**
- * Copia arquivos ou diretórios especificando um caminho ou padrão glob para o destino.
- * @param pattern - Caminho do arquivo/diretório de origem ou padrão glob.
- * @param destination - Diretório ou caminho de destino.
+ * Copia arquivos especificando um caminho de origem para o destino.
+ * @param src - Caminho do arquivo de origem.
+ * @param destination - Caminho de destino final.
  */
-async function copy(pattern: string, destination: string) {
-    const isGlobPattern = /[*\?\[\]]/.test(pattern);
-
-    if (isGlobPattern) {
-        for await (const entry of glob(pattern)) {
-            const entryStat = await stat(entry).catch(() => null);
-            if (entryStat && entryStat.isFile()) {
-                const destPath = join(destination, entry);
-                await mkdir(dirname(destPath), { recursive: true });
-                await cp(entry, destPath);
-            }
-        }
-    } else {
-        await mkdir(dirname(destination), { recursive: true });
-        await cp(pattern, destination, { recursive: true });
-    }
+async function copy(src: string, destination: string) {
+    await mkdir(dirname(destination), { recursive: true });
+    await cp(src, destination, { recursive: true });
 }
 
 /**
@@ -48,15 +35,21 @@ async function copy(pattern: string, destination: string) {
  * - Demais arquivos são copiados com a extensão original.
  * 
  * @param context - O contexto do scaffolding contendo as variáveis do projeto.
- * @param templateFolder - O caminho do diretório de template.
- * @param outputFolder - O caminho do diretório de destino (padrão: `"."`).
+ * @param pattern - Padrão glob dos arquivos a serem renderizados.
+ * @param outputFolder - O caminho do diretório de destino.
+ * @returns Lista de caminhos absolutos dos arquivos criados.
  */
 export async function render(
     context: ScaffoldContext,
     pattern: string = '**/*',
     outputFolder: string = '.',
-) {
-    outputFolder = resolve(context.folder, outputFolder)
+): Promise<string[]> {
+    outputFolder = resolve(context.folder, outputFolder);
+    const createdFiles: string[] = [];
+
+    if (!Array.isArray(context.createdFiles)) {
+        context.createdFiles = [];
+    }
 
     for await (const relPath of glob(pattern, { cwd: context.renderFolder })) {
         const fullSrcPath = join(context.renderFolder, relPath);
@@ -66,18 +59,23 @@ export async function render(
             continue;
         }
 
+        let destPath: string;
         if (relPath.endsWith('.ejs.ejs')) {
-            // Copia apenas como .ejs sem renderizar
-            const destPath = join(outputFolder, relPath.slice(0, -4));
+            destPath = join(outputFolder, relPath.slice(0, -4));
             await copy(fullSrcPath, destPath);
         } else if (relPath.endsWith('.ejs')) {
-            // Renderiza o arquivo .ejs e salva sem a extensão .ejs
-            const destPath = join(outputFolder, relPath.slice(0, -4));
+            destPath = join(outputFolder, relPath.slice(0, -4));
             await renderFile(context, fullSrcPath, destPath);
         } else {
-            // Copia demais arquivos mantendo a extensão original
-            const destPath = join(outputFolder, relPath);
+            destPath = join(outputFolder, relPath);
             await copy(fullSrcPath, destPath);
         }
+
+        createdFiles.push(destPath);
+        if (!(context.createdFiles as string[]).includes(destPath)) {
+            (context.createdFiles as string[]).push(destPath);
+        }
     }
+
+    return createdFiles;
 }
