@@ -43,11 +43,50 @@ export interface PackageManager {
 }
 
 /**
+ * Definição de um argumento de template.
+ */
+export interface TemplatePromptObject<T = any> {
+    /** Flags do Commander (ex: '-l, --lang <value>' ou '--lang <value>'). */
+    flags?: string;
+    /** Descrição do argumento exibida na CLI e no --help. */
+    description?: string;
+    /** Valor padrão caso o argumento não seja informado. */
+    default?: T;
+    /** Função interativa de prompt a ser executada caso a flag não seja informada na CLI. */
+    prompt(): Promise<T>;
+}
+
+/**
+ * Inferência do tipo de retorno de um prompt a partir da sua função de prompt ou default.
+ */
+export type InferPromptType<T> = T extends TemplatePromptObject<infer U> ? U : unknown;
+
+/**
+ * Mapeamento das chaves de prompts para funções assíncronas de resolução lazy.
+ */
+export type TemplatePromptsMap<P> = {
+    [K in keyof P]: () => Promise<InferPromptType<P[K]>>;
+};
+
+/**
+ * Contexto fornecido para a etapa de configuração do template.
+ */
+export interface ConfigContext<
+    Config = Record<string, unknown>,
+    Prompts = Record<string, any>
+> {
+    /** Contexto acumulado do gerador. */
+    context: ScaffoldContext & Config;
+    /** Prompts da CLI / Template resolvidos de forma lazy. */
+    prompts: TemplatePromptsMap<Prompts>;
+}
+
+/**
  * Contexto fornecido para o gancho de renderização do template.
  */
-export interface RenderContext<Context> {
+export interface RenderContext<Config = Record<string, unknown>> {
     /** Objeto de contexto acumulado no gerador. */
-    context: Context;
+    context: ScaffoldContext & Config;
     /**
      * Função para renderizar um padrão de arquivos do template no destino.
      * @param input - Padrão glob ou arquivo relativo a ser renderizado.
@@ -60,9 +99,9 @@ export interface RenderContext<Context> {
 /**
  * Contexto fornecido para o gancho de instalação de dependências.
  */
-export interface InstallContext<Context> {
+export interface InstallContext<Config extends Record<string, unknown> = Record<string, unknown>> {
     /** Objeto de contexto acumulado no gerador. */
-    context: Context;
+    context: ScaffoldContext & Config;
     /** Instância do gerenciador de pacotes selecionado. */
     packageManager: PackageManager;
     /** Executa a instalação padrão das dependências acumuladas em `context.dependencies`. */
@@ -72,19 +111,19 @@ export interface InstallContext<Context> {
 /**
  * Contexto fornecido para a geração da mensagem de banner inicial.
  */
-export interface BannerContext<Context> {
+export interface BannerContext<Config extends Record<string, unknown> = Record<string, unknown>> {
     /** Objeto de contexto atual (se disponível). */
-    context?: Context;
+    context?: ScaffoldContext & Config;
     /** Definição do template executado. */
-    template: ScaffoldTemplate<any, any>;
+    template: ScaffoldTemplate<Config, any>;
 }
 
 /**
  * Contexto fornecido para o gancho de finalização do processo.
  */
-export interface FinishContext<Context> {
+export interface FinishContext<Config = Record<string, unknown>> {
     /** Objeto de contexto final acumulado. */
-    context: Context;
+    context: ScaffoldContext & Config;
     /** Instância do gerenciador de pacotes selecionado. */
     packageManager: PackageManager;
     /** Exibe a mensagem de instrução pós-geração padrão. */
@@ -94,58 +133,46 @@ export interface FinishContext<Context> {
 /**
  * Definição completa do contrato de um template de scaffolding.
  */
-export interface ScaffoldTemplate<Context = ScaffoldContext, Config extends Partial<Context> = Context> {
+export interface ScaffoldTemplate<
+    Config extends Record<string, unknown> = Record<string, unknown>,
+    Prompts extends Record<string, any> = Record<string, any>
+> {
     /** Nome amigável do template. */
     name?: string;
     /** Caminho absoluto do diretório do template. */
-    folder: string;
+    folder?: string;
+    /** Mapeamento de argumentos configuráveis da linha de comando e prompts. */
+    prompts?: Prompts;
+    /** Alias para prompts configuráveis. */
+    args?: Prompts;
     /** Banner visual exibido no início da execução. */
     banner?: string | ((context?: BannerContext<Config>) => Promise<void | string> | void | string);
     /** Etapa de configuração e perguntas interativas. */
-    config?(context: Context): Promise<any>;
+    config?(context: ConfigContext<Config, Prompts>): Promise<Partial<Config> | void> | Partial<Config> | void;
     /** Etapa de renderização dos arquivos de template. */
-    render?(context: RenderContext<Config>): Promise<void>;
+    render?(context: RenderContext<Config>): Promise<void> | void;
     /** Etapa personalizada de instalação de dependências. */
-    install?(context: InstallContext<Config>): Promise<void>;
-    /** Etapa final após a geração do projeto. */
-    finish?(context: FinishContext<Config>): Promise<void>;
+    install?(context: InstallContext<Config>): Promise<void> | void;
+    /** Etapa final após a geração do processo. */
+    finish?(context: FinishContext<Config>): Promise<void> | void;
 }
 
 /**
- * Objeto de inicialização para definir um template de scaffolding.
+ * Alias mantido para compatibilidade com inicialização de templates.
  */
-export interface ScaffoldTemplateInit<Context = ScaffoldContext, Config extends Partial<Context> = Context> {
-    /** Nome amigável do template. */
-    name?: string;
-    /** Banner visual exibido no início da execução. */
-    banner?: string | ((context?: BannerContext<Config>) => Promise<void | string> | void | string);
-    /** Etapa de configuração e perguntas interativas. */
-    config?(context: Context): Promise<any>;
-    /** Etapa de renderização dos arquivos de template. */
-    render?(context: RenderContext<Config>): Promise<void>;
-    /** Etapa personalizada de instalação de dependências. */
-    install?(context: InstallContext<Config>): Promise<void>;
-    /** Etapa final após a geração do projeto. */
-    finish?(context: FinishContext<Config>): Promise<void>;
-}
+export type ScaffoldTemplateInit<
+    Config extends Record<string, unknown> = Record<string, unknown>,
+    Prompts extends Record<string, any> = Record<string, any>
+> = ScaffoldTemplate<Config, Prompts>;
 
 /**
  * Função utilitária para definir um template de scaffolding com inferência estrita de tipos.
  * @param template - Objeto de configuração do template.
  * @returns O próprio objeto de template tipado.
  */
-export function defineTemplate<const Template extends ScaffoldTemplateInit>(template: Template): Template {
+export function defineTemplate<
+    const Config extends Record<string, unknown> = Record<string, unknown>,
+    const Prompts extends Record<string, any> = Record<string, any>
+>(template: ScaffoldTemplate<Config, Prompts>): ScaffoldTemplate<Config, Prompts> {
     return template;
 }
-
-export {
-    input,
-    select,
-    confirm,
-    checkbox,
-    password,
-    expand,
-    rawlist,
-    editor,
-    search
-} from "./inquirer";

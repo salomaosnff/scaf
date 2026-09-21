@@ -19,6 +19,50 @@ export interface RunTemplateOptions {
     packageManager?: string;
     /** Sobreescreve o diretório de destino caso ele já exista. */
     override?: boolean;
+    /** Argumentos de linha de comando repassados para o template. */
+    args?: Record<string, any>;
+}
+
+/**
+ * Cria o proxy utilitário para a resolução lazy de prompts e argumentos de linha de comando.
+ */
+export function createPromptsProxy(
+    templatePrompts: Record<string, any> = {},
+    cliArgs: Record<string, any> = {}
+) {
+    return new Proxy({}, {
+        get(_target, prop: string) {
+            return async (fallback?: any) => {
+                if (prop in cliArgs && cliArgs[prop] !== undefined) {
+                    return cliArgs[prop];
+                }
+
+                const promptDef = templatePrompts[prop];
+
+                if (fallback !== undefined) {
+                    if (typeof fallback === 'function') {
+                        return await fallback();
+                    }
+                    return fallback;
+                }
+
+                if (promptDef) {
+                    if (typeof promptDef === 'object' && promptDef !== null) {
+                        if (typeof promptDef.prompt === 'function') {
+                            return await promptDef.prompt();
+                        }
+                        if ('default' in promptDef) {
+                            return promptDef.default;
+                        }
+                    } else if (typeof promptDef === 'function') {
+                        return await promptDef();
+                    }
+                }
+
+                return undefined;
+            };
+        }
+    });
 }
 
 /**
@@ -114,7 +158,22 @@ export async function scaffold<Context extends ScaffoldContext = ScaffoldContext
         console.log(`\n🚀 ${template.name}\n`);
     }
 
-    Object.assign(ctx, await template.config?.(ctx));
+    const templatePrompts = template.prompts ?? template.args;
+    const promptsProxy = createPromptsProxy(templatePrompts, opts.args);
+
+    const configContext = new Proxy(ctx, {
+        get(target, prop, receiver) {
+            if (prop === 'context') return ctx;
+            if (prop === 'prompts') return promptsProxy;
+            if (prop === 'args') return promptsProxy;
+            return Reflect.get(target, prop, receiver);
+        }
+    });
+
+    const configResult = await template.config?.(configContext as any);
+    if (configResult && typeof configResult === 'object') {
+        Object.assign(ctx, configResult);
+    }
 
     if (template.render) {
         await template.render({

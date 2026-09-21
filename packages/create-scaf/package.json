@@ -1,6 +1,6 @@
 {
   "name": "create-scaf",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Scaffold a new project from a template",
   "type": "module",
   "main": "./dist/index.js",
