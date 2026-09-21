@@ -19,19 +19,28 @@ npm install @create-scaf/template
 No arquivo `template.ts` ou `template.js` da raiz do seu template:
 
 ```ts
-import { defineTemplate, select, confirm, input } from "@create-scaf/template";
+import { defineTemplate } from "@create-scaf/template";
+import { confirm, input } from "@create-scaf/template/inquirer";
 
 export default defineTemplate({
     name: "Meu Template Customizado",
     banner: "🚀 INICIANDO SCAFFOLDING 🚀",
-    async config(ctx) {
-        const projectName = await input({ message: "Nome do projeto:" });
-        const useTypeScript = await confirm({ message: "Usar TypeScript?" });
+    prompts: {
+        ts: {
+            flags: "-t, --typescript",
+            description: "Usar TypeScript",
+            prompt: () => confirm({ message: "Usar TypeScript?" })
+        }
+    },
+    async config({ prompts, context }) {
+        const useTypeScript = await prompts.ts();
 
-        ctx.dependencies.push("express");
+        context.dependencies.push("express");
+        if (useTypeScript) {
+            context.devDependencies.push("typescript");
+        }
 
         return {
-            projectName,
             useTypeScript
         };
     },
@@ -51,10 +60,10 @@ export default defineTemplate({
 
 ## ⚙️ Subpath Export para Inquirer Prompts
 
-Você pode importar diretamente os prompts de inquirer via subpath:
+Você pode importar diretamente os prompts do `@inquirer/prompts` via subpath:
 
 ```ts
-import { select, confirm, input } from "@create-scaf/template/inquirer";
+import { select, confirm, input, checkbox } from "@create-scaf/template/inquirer";
 ```
 
 ---

@@ -9,17 +9,17 @@ Binário CLI oficial para criação rápida de projetos a partir de templates lo
 Você pode executar o `create-scaf` sem necessidade de instalação global:
 
 ```bash
-# Com pnpm
+# Sintaxe padrão: create-scaf <template> [destination]
 pnpm create scaf salomaosnff/vue-vanilla
 
 # Com npx
 npx create-scaf salomaosnff/vue-vanilla meu-projeto
 
-# Especificando a flag --template
-pnpm create scaf --template salomaosnff/vue-vanilla meu-projeto
-
 # Usando um template da sua máquina local
-pnpm create scaf --template ./caminho/do/template meu-projeto
+npx create-scaf ./caminho/do/template meu-projeto
+
+# Passando argumentos do template via CLI
+npx create-scaf ./caminho/do/template meu-projeto -l ts -e
 ```
 
 ---
@@ -27,17 +27,23 @@ pnpm create scaf --template ./caminho/do/template meu-projeto
 ## 📋 Flags e Opções
 
 ```text
-Usage: create-scaf [options] [arg1] [arg2]
+Usage: create-scaf <template> [destination]
+
+Scaffold a new project from a template
 
 Arguments:
-  arg1                          Template ou pasta de destino
-  arg2                          Pasta de destino (quando arg1 for o template)
+  template                      Nome do template ou repositório
+  destination                   Pasta de destino do projeto
 
 Options:
-  -t, --template <template>     Define o template a ser utilizado
   -p, --package-manager <name>  Define o gerenciador de pacotes (npm, pnpm, yarn)
   -f, --force                   Sobreescreve a pasta destino se ela existir
-  -h, --help                    Exibe a ajuda do comando
+  -h, --help                    display help for command
+
+Template Options:
+  -l, --lang <value>            Selecione a linguagem do projeto (ts ou js)
+  -r, --router                  Utilizar Vue Router
+  -e, --eslint                  Configurar ESLint
 ```
 
 ---
