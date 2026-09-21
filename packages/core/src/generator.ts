@@ -128,15 +128,26 @@ export async function scaffold<Context extends ScaffoldContext = ScaffoldContext
     }
 
     async function install() {
-        {
-            const { promise, resolve, reject } = Promise.withResolvers<void>()
-            packageManager.add(ctx.dependencies.dependencies).addListener('error', reject).addListener('close', resolve)
-            await promise
+        if (ctx.dependencies.dependencies.length > 0) {
+            const { promise, resolve, reject } = Promise.withResolvers<void>();
+            packageManager.add(ctx.dependencies.dependencies).addListener('error', reject).addListener('close', (code) => {
+                if (code === 0) resolve(); else reject(new Error(`Falha ao instalar dependências (código ${code})`));
+            });
+            await promise;
         }
-        {
-            const { promise, resolve, reject } = Promise.withResolvers<void>()
-            packageManager.addDev(ctx.dependencies.devDependencies).addListener('error', reject).addListener('close', resolve)
-            await promise
+        if (ctx.dependencies.devDependencies.length > 0) {
+            const { promise, resolve, reject } = Promise.withResolvers<void>();
+            packageManager.addDev(ctx.dependencies.devDependencies).addListener('error', reject).addListener('close', (code) => {
+                if (code === 0) resolve(); else reject(new Error(`Falha ao instalar devDependencies (código ${code})`));
+            });
+            await promise;
+        }
+        if (ctx.dependencies.dependencies.length === 0 && ctx.dependencies.devDependencies.length === 0) {
+            const { promise, resolve, reject } = Promise.withResolvers<void>();
+            packageManager.install().addListener('error', reject).addListener('close', (code) => {
+                if (code === 0) resolve(); else reject(new Error(`Falha ao instalar dependências (código ${code})`));
+            });
+            await promise;
         }
     }
 

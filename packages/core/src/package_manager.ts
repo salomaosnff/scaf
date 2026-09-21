@@ -9,13 +9,13 @@ import type { PackageManager } from "@create-scaf/template";
 export function createNpm(cwd: string): PackageManager {
     return {
         install() {
-            return spawn("npm", ["install"], { cwd, stdio: "inherit" });
+            return spawn("npm", ["install"], { cwd, stdio: "inherit", shell: true });
         },
         add(dependencies: string[]) {
-            return spawn("npm", ["install", ...dependencies], { cwd, stdio: "inherit" });
+            return spawn("npm", ["install", ...dependencies], { cwd, stdio: "inherit", shell: true });
         },
         addDev(dependencies: string[]) {
-            return spawn("npm", ["install", "-D", ...dependencies], { cwd, stdio: "inherit" });
+            return spawn("npm", ["install", "-D", ...dependencies], { cwd, stdio: "inherit", shell: true });
         },
         getRunCommand(script) {
             return `npm run ${script}`;
@@ -30,13 +30,13 @@ export function createNpm(cwd: string): PackageManager {
 export function createPnpm(cwd: string): PackageManager {
     return {
         install() {
-            return spawn("pnpm", ["install"], { cwd, stdio: "inherit" });
+            return spawn("pnpm", ["install"], { cwd, stdio: "inherit", shell: true });
         },
         add(dependencies: string[]) {
-            return spawn("pnpm", ["add", ...dependencies], { cwd, stdio: "inherit" });
+            return spawn("pnpm", ["add", ...dependencies], { cwd, stdio: "inherit", shell: true });
         },
         addDev(dependencies: string[]) {
-            return spawn("pnpm", ["add", "-D", ...dependencies], { cwd, stdio: "inherit" });
+            return spawn("pnpm", ["add", "-D", ...dependencies], { cwd, stdio: "inherit", shell: true });
         },
         getRunCommand(script) {
             return `pnpm ${script}`;
@@ -51,13 +51,13 @@ export function createPnpm(cwd: string): PackageManager {
 export function createYarn(cwd: string): PackageManager {
     return {
         install() {
-            return spawn("yarn", ["install"], { cwd, stdio: "inherit" });
+            return spawn("yarn", ["install"], { cwd, stdio: "inherit", shell: true });
         },
         add(dependencies: string[]) {
-            return spawn("yarn", ["add", ...dependencies], { cwd, stdio: "inherit" });
+            return spawn("yarn", ["add", ...dependencies], { cwd, stdio: "inherit", shell: true });
         },
         addDev(dependencies: string[]) {
-            return spawn("yarn", ["add", "-D", ...dependencies], { cwd, stdio: "inherit" });
+            return spawn("yarn", ["add", "-D", ...dependencies], { cwd, stdio: "inherit", shell: true });
         },
         getRunCommand(script) {
             return `yarn ${script}`;
