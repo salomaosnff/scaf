@@ -1,48 +1,6 @@
 import { select } from "@inquirer/prompts";
-import { spawn, type ChildProcess } from "node:child_process";
-import { delimiter, dirname } from "node:path";
+import { spawn } from "node:child_process";
 import type { PackageManager } from "@create-scaf/template";
-
-/**
- * Executa comandos do gerenciador de pacotes de forma robusta e multiplataforma.
- */
-function safeSpawn(command: string, args: string[], cwd: string): ChildProcess {
-    const binDir = dirname(process.execPath);
-    const currentPath = process.env.PATH || '';
-    const newPath = currentPath.includes(binDir)
-        ? currentPath
-        : `${binDir}${delimiter}${currentPath}`;
-
-    const env = {
-        ...process.env,
-        PATH: newPath
-    };
-
-    const npmExecPath = process.env.npm_execpath;
-    if (npmExecPath) {
-        const execPathLower = npmExecPath.toLowerCase();
-        if (
-            (command === 'npm' && execPathLower.includes('npm')) ||
-            (command === 'pnpm' && execPathLower.includes('pnpm')) ||
-            (command === 'yarn' && execPathLower.includes('yarn'))
-        ) {
-            return spawn(process.execPath, [npmExecPath, ...args], {
-                cwd,
-                stdio: "inherit",
-                env
-            });
-        }
-    }
-
-    const isWindows = process.platform === 'win32';
-
-    return spawn(command, args, {
-        cwd,
-        stdio: "inherit",
-        shell: isWindows,
-        env
-    });
-}
 
 /**
  * Cria a instância do gerenciador de pacotes NPM para o diretório informado.
@@ -51,13 +9,13 @@ function safeSpawn(command: string, args: string[], cwd: string): ChildProcess {
 export function createNpm(cwd: string): PackageManager {
     return {
         install() {
-            return safeSpawn("npm", ["install"], cwd);
+            return spawn("npm", ["install"], { cwd, stdio: "inherit" });
         },
         add(dependencies: string[]) {
-            return safeSpawn("npm", ["install", ...dependencies], cwd);
+            return spawn("npm", ["install", ...dependencies], { cwd, stdio: "inherit" });
         },
         addDev(dependencies: string[]) {
-            return safeSpawn("npm", ["install", "-D", ...dependencies], cwd);
+            return spawn("npm", ["install", "-D", ...dependencies], { cwd, stdio: "inherit" });
         },
         getRunCommand(script) {
             return `npm run ${script}`;
@@ -72,13 +30,13 @@ export function createNpm(cwd: string): PackageManager {
 export function createPnpm(cwd: string): PackageManager {
     return {
         install() {
-            return safeSpawn("pnpm", ["install"], cwd);
+            return spawn("pnpm", ["install"], { cwd, stdio: "inherit" });
         },
         add(dependencies: string[]) {
-            return safeSpawn("pnpm", ["add", ...dependencies], cwd);
+            return spawn("pnpm", ["add", ...dependencies], { cwd, stdio: "inherit" });
         },
         addDev(dependencies: string[]) {
-            return safeSpawn("pnpm", ["add", "-D", ...dependencies], cwd);
+            return spawn("pnpm", ["add", "-D", ...dependencies], { cwd, stdio: "inherit" });
         },
         getRunCommand(script) {
             return `pnpm ${script}`;
@@ -93,13 +51,13 @@ export function createPnpm(cwd: string): PackageManager {
 export function createYarn(cwd: string): PackageManager {
     return {
         install() {
-            return safeSpawn("yarn", ["install"], cwd);
+            return spawn("yarn", ["install"], { cwd, stdio: "inherit" });
         },
         add(dependencies: string[]) {
-            return safeSpawn("yarn", ["add", ...dependencies], cwd);
+            return spawn("yarn", ["add", ...dependencies], { cwd, stdio: "inherit" });
         },
         addDev(dependencies: string[]) {
-            return safeSpawn("yarn", ["add", "-D", ...dependencies], cwd);
+            return spawn("yarn", ["add", "-D", ...dependencies], { cwd, stdio: "inherit" });
         },
         getRunCommand(script) {
             return `yarn ${script}`;

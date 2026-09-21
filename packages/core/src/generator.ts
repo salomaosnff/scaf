@@ -124,7 +124,7 @@ export async function scaffold<Context extends ScaffoldContext = ScaffoldContext
             }
         });
     } else {
-        await render(ctx, 'template')
+        await render(ctx, "**/*");
     }
 
     async function install() {

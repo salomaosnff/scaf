@@ -1,6 +1,6 @@
 {
   "name": "@create-scaf/template",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Template definition tools, interfaces, and prompts for create-scaf",
   "type": "module",
   "main": "./dist/index.js",
