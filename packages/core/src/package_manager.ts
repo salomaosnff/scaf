@@ -1,6 +1,28 @@
 import { select } from "@inquirer/prompts";
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
+import { delimiter, dirname } from "node:path";
 import type { PackageManager } from "@create-scaf/template";
+
+/**
+ * Executa comandos filho garantindo que o diretório bin do Node (ex: fnm, nvm) esteja no PATH.
+ */
+function safeSpawn(command: string, args: string[], cwd: string): ChildProcess {
+    const binDir = dirname(process.execPath);
+    const currentPath = process.env.PATH || '';
+    const newPath = currentPath.includes(binDir)
+        ? currentPath
+        : `${binDir}${delimiter}${currentPath}`;
+
+    return spawn(command, args, {
+        cwd,
+        stdio: "inherit",
+        shell: true,
+        env: {
+            ...process.env,
+            PATH: newPath
+        }
+    });
+}
 
 /**
  * Cria a instância do gerenciador de pacotes NPM para o diretório informado.
@@ -9,13 +31,13 @@ import type { PackageManager } from "@create-scaf/template";
 export function createNpm(cwd: string): PackageManager {
     return {
         install() {
-            return spawn("npm", ["install"], { cwd, stdio: "inherit", shell: true });
+            return safeSpawn("npm", ["install"], cwd);
         },
         add(dependencies: string[]) {
-            return spawn("npm", ["install", ...dependencies], { cwd, stdio: "inherit", shell: true });
+            return safeSpawn("npm", ["install", ...dependencies], cwd);
         },
         addDev(dependencies: string[]) {
-            return spawn("npm", ["install", "-D", ...dependencies], { cwd, stdio: "inherit", shell: true });
+            return safeSpawn("npm", ["install", "-D", ...dependencies], cwd);
         },
         getRunCommand(script) {
             return `npm run ${script}`;
@@ -30,13 +52,13 @@ export function createNpm(cwd: string): PackageManager {
 export function createPnpm(cwd: string): PackageManager {
     return {
         install() {
-            return spawn("pnpm", ["install"], { cwd, stdio: "inherit", shell: true });
+            return safeSpawn("pnpm", ["install"], cwd);
         },
         add(dependencies: string[]) {
-            return spawn("pnpm", ["add", ...dependencies], { cwd, stdio: "inherit", shell: true });
+            return safeSpawn("pnpm", ["add", ...dependencies], cwd);
         },
         addDev(dependencies: string[]) {
-            return spawn("pnpm", ["add", "-D", ...dependencies], { cwd, stdio: "inherit", shell: true });
+            return safeSpawn("pnpm", ["add", "-D", ...dependencies], cwd);
         },
         getRunCommand(script) {
             return `pnpm ${script}`;
@@ -51,13 +73,13 @@ export function createPnpm(cwd: string): PackageManager {
 export function createYarn(cwd: string): PackageManager {
     return {
         install() {
-            return spawn("yarn", ["install"], { cwd, stdio: "inherit", shell: true });
+            return safeSpawn("yarn", ["install"], cwd);
         },
         add(dependencies: string[]) {
-            return spawn("yarn", ["add", ...dependencies], { cwd, stdio: "inherit", shell: true });
+            return safeSpawn("yarn", ["add", ...dependencies], cwd);
         },
         addDev(dependencies: string[]) {
-            return spawn("yarn", ["add", "-D", ...dependencies], { cwd, stdio: "inherit", shell: true });
+            return safeSpawn("yarn", ["add", "-D", ...dependencies], cwd);
         },
         getRunCommand(script) {
             return `yarn ${script}`;
