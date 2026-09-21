@@ -1,0 +1,62 @@
+<script setup>
+import HelloWorld from './components/HelloWorld.vue'
+</script>
+
+<template>
+  <div class="app-container">
+    <header class="header">
+      <img src="https://vuejs.org/images/logo.png" class="logo vue" alt="Vue logo" />
+      <h1>Welcome to <%= project.name %></h1>
+      <% if (vueRouter) { %>
+      <nav class="nav">
+        <router-link to="/">Home</router-link> |
+        <router-link to="/about">About</router-link>
+      </nav>
+      <% } %>
+    </header>
+    <main>
+      <% if (vueRouter) { %>
+      <router-view />
+      <% } else { %>
+      <HelloWorld msg="Vue 3 + Vite + JavaScript" />
+      <% } %>
+    </main>
+  </div>
+</template>
+
+<style scoped>
+.app-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #42b883aa);
+}
+
+.nav {
+  margin: 1rem 0;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.nav a {
+  font-weight: bold;
+  color: #2c3e50;
+  text-decoration: none;
+}
+
+.nav a.router-link-exact-active {
+  color: #42b883;
+}
+</style>

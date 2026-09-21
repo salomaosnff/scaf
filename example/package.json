@@ -1,0 +1,11 @@
+{
+  "name": "scaffold-example-vue",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@create-scaf/core": "workspace:*",
+    "@create-scaf/template": "workspace:*",
+    "create-scaf": "workspace:*"
+  }
+}

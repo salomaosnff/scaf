@@ -1,0 +1,10 @@
+import { createApp } from 'vue'
+import './style.css'
+import App from './App.vue'
+<% if (vueRouter) { %>import router from './router'<% } %>
+
+const app = createApp(App)
+
+<% if (vueRouter) { %>app.use(router)<% } %>
+
+app.mount('#app')

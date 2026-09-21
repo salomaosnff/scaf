@@ -1,0 +1,10 @@
+{
+  "name": "create-scaf-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm --filter create-scaf dev"
+  }
+}
