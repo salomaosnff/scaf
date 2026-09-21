@@ -139,10 +139,8 @@ export async function scaffold<Context extends ScaffoldContext = ScaffoldContext
         folder,
         templateFolder: template.folder,
         renderFolder: join(template.folder, 'template'),
-        dependencies: {
-            dependencies: [],
-            devDependencies: []
-        }
+        dependencies: [],
+        devDependencies: []
     };
 
     const ctx = (context ?? defaultContext) as Context;
@@ -187,21 +185,21 @@ export async function scaffold<Context extends ScaffoldContext = ScaffoldContext
     }
 
     async function install() {
-        if (ctx.dependencies.dependencies.length > 0) {
+        if (ctx.dependencies.length > 0) {
             const { promise, resolve, reject } = Promise.withResolvers<void>();
-            packageManager.add(ctx.dependencies.dependencies).addListener('error', reject).addListener('close', (code) => {
+            packageManager.add(ctx.dependencies).addListener('error', reject).addListener('close', (code) => {
                 if (code === 0) resolve(); else reject(new Error(`Falha ao instalar dependências (código ${code})`));
             });
             await promise;
         }
-        if (ctx.dependencies.devDependencies.length > 0) {
+        if (ctx.devDependencies.length > 0) {
             const { promise, resolve, reject } = Promise.withResolvers<void>();
-            packageManager.addDev(ctx.dependencies.devDependencies).addListener('error', reject).addListener('close', (code) => {
+            packageManager.addDev(ctx.devDependencies).addListener('error', reject).addListener('close', (code) => {
                 if (code === 0) resolve(); else reject(new Error(`Falha ao instalar devDependencies (código ${code})`));
             });
             await promise;
         }
-        if (ctx.dependencies.dependencies.length === 0 && ctx.dependencies.devDependencies.length === 0) {
+        if (ctx.dependencies.length === 0 && ctx.devDependencies.length === 0) {
             const { promise, resolve, reject } = Promise.withResolvers<void>();
             packageManager.install().addListener('error', reject).addListener('close', (code) => {
                 if (code === 0) resolve(); else reject(new Error(`Falha ao instalar dependências (código ${code})`));

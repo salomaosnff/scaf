@@ -12,9 +12,7 @@ export function createDefaultContext(folder: string, templateFolder: string): Sc
         folder,
         templateFolder,
         renderFolder: `${templateFolder}/template`,
-        dependencies: {
-            dependencies: [],
-            devDependencies: []
-        }
+        dependencies: [],
+        devDependencies: []
     };
 }

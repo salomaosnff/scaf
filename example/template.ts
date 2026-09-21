@@ -45,30 +45,30 @@ export default defineTemplate({
         const usePrettier = await prompts.prettier();
 
         // Dependências de produção
-        context.dependencies.dependencies.push("vue");
+        context.dependencies.push("vue");
 
         // Dependências de desenvolvimento
-        context.dependencies.devDependencies.push("vite", "@vitejs/plugin-vue");
+        context.devDependencies.push("vite", "@vitejs/plugin-vue");
 
         if (variant === "ts") {
-            context.dependencies.devDependencies.push("typescript", "vue-tsc", "@types/node");
+            context.devDependencies.push("typescript", "vue-tsc", "@types/node");
         }
 
         if (vueRouter) {
-            context.dependencies.dependencies.push("vue-router");
+            context.dependencies.push("vue-router");
         }
 
         if (useEslint) {
-            context.dependencies.devDependencies.push("eslint", "eslint-plugin-vue");
+            context.devDependencies.push("eslint", "eslint-plugin-vue");
             if (variant === "ts") {
-                context.dependencies.devDependencies.push("@vue/eslint-config-typescript");
+                context.devDependencies.push("@vue/eslint-config-typescript");
             }
         }
 
         if (usePrettier) {
-            context.dependencies.devDependencies.push("prettier");
+            context.devDependencies.push("prettier");
             if (useEslint) {
-                context.dependencies.devDependencies.push("eslint-config-prettier", "eslint-plugin-prettier@^5.2.0");
+                context.devDependencies.push("eslint-config-prettier", "eslint-plugin-prettier@^5.2.0");
             }
         }
 

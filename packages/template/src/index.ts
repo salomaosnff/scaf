@@ -1,16 +1,6 @@
 import type { ChildProcess } from "node:child_process";
 
 /**
- * Representa as dependências declaradas para o projeto gerado.
- */
-export interface Dependencies {
-    /** Lista de dependências de produção. */
-    dependencies: string[];
-    /** Lista de dependências de desenvolvimento. */
-    devDependencies: string[];
-}
-
-/**
  * Contexto principal passado e compartilhado durante a execução do scaffolding.
  */
 export interface ScaffoldContext {
@@ -20,8 +10,10 @@ export interface ScaffoldContext {
     templateFolder: string;
     /** Caminho da pasta de templates a ser renderizada. */
     renderFolder: string;
-    /** Gerenciador de dependências acumuladas. */
-    dependencies: Dependencies;
+    /** Lista de dependências de produção. */
+    dependencies: string[];
+    /** Lista de dependências de desenvolvimento. */
+    devDependencies: string[];
     /** Lista de caminhos absolutos dos arquivos criados durante a renderização. */
     createdFiles?: string[];
     /** Propriedades adicionais arbitrárias inseridas durante a etapa de configuração. */

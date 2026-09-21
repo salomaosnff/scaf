@@ -75,8 +75,8 @@ export default defineTemplate({
         const useEslint = await confirm({ message: "Configurar ESLint?" });
 
         // Adiciona dependências acumuladas
-        ctx.dependencies.dependencies.push("vue");
-        ctx.dependencies.devDependencies.push("vite");
+        ctx.dependencies.push("vue");
+        ctx.devDependencies.push("vite");
 
         return {
             variant,

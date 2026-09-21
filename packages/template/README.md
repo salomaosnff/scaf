@@ -28,7 +28,7 @@ export default defineTemplate({
         const projectName = await input({ message: "Nome do projeto:" });
         const useTypeScript = await confirm({ message: "Usar TypeScript?" });
 
-        ctx.dependencies.dependencies.push("express");
+        ctx.dependencies.push("express");
 
         return {
             projectName,
