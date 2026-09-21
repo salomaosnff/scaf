@@ -1,3 +1,7 @@
+/**
+ * Ponto de entrada da CLI `create-scaf`.
+ * Configura as opções do Commander e repassa a execução para o mecanismo de scaffolding do `@create-scaf/core`.
+ */
 import { Command } from "commander";
 import { scaffold } from "@create-scaf/core";
 

@@ -1,4 +1,3 @@
-
 import { rm, stat } from "node:fs/promises";
 import { join, relative } from "node:path";
 
@@ -8,16 +7,36 @@ import { getPackageManager } from "./package_manager";
 import { render } from "./render";
 import { getTemplate } from "./template";
 
-
+/**
+ * Opções de configuração para execução do processo de scaffolding.
+ */
 export interface RunTemplateOptions {
+    /** Nome do repositório remoto ou caminho do template local. */
     template?: string;
+    /** Pasta de destino do novo projeto. */
     folder?: string;
+    /** Nome do gerenciador de pacotes desejado (npm, pnpm, yarn). */
     packageManager?: string;
+    /** Sobreescreve o diretório de destino caso ele já exista. */
     override?: boolean;
 }
 
+/**
+ * Alias para as opções de execução do scaffolding.
+ */
 export type ScaffoldOptions = RunTemplateOptions;
 
+/**
+ * Executa o fluxo completo de geração de projetos (scaffolding).
+ * 
+ * 1. Coleta dados de template e pasta caso não informados.
+ * 2. Resolve e carrega a definição do template (local ou git).
+ * 3. Prepara o contexto e executa os ganchos do template: banner, config, render, install e finish.
+ * 
+ * @param targetTemplate - Nome/caminho do template ou objeto de opções `ScaffoldOptions`.
+ * @param context - Contexto opcional predefinido.
+ * @param cliOptions - Opções adicionais de CLI.
+ */
 export async function scaffold<Context extends ScaffoldContext = ScaffoldContext>(
     targetTemplate?: string | RunTemplateOptions,
     context?: Context,
