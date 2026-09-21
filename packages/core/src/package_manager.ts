@@ -4,7 +4,7 @@ import { delimiter, dirname } from "node:path";
 import type { PackageManager } from "@create-scaf/template";
 
 /**
- * Executa comandos filho garantindo que o diretório bin do Node (ex: fnm, nvm) esteja no PATH.
+ * Executa comandos do gerenciador de pacotes de forma robusta e multiplataforma.
  */
 function safeSpawn(command: string, args: string[], cwd: string): ChildProcess {
     const binDir = dirname(process.execPath);
@@ -13,16 +13,34 @@ function safeSpawn(command: string, args: string[], cwd: string): ChildProcess {
         ? currentPath
         : `${binDir}${delimiter}${currentPath}`;
 
+    const env = {
+        ...process.env,
+        PATH: newPath
+    };
+
+    const npmExecPath = process.env.npm_execpath;
+    if (npmExecPath) {
+        const execPathLower = npmExecPath.toLowerCase();
+        if (
+            (command === 'npm' && execPathLower.includes('npm')) ||
+            (command === 'pnpm' && execPathLower.includes('pnpm')) ||
+            (command === 'yarn' && execPathLower.includes('yarn'))
+        ) {
+            return spawn(process.execPath, [npmExecPath, ...args], {
+                cwd,
+                stdio: "inherit",
+                env
+            });
+        }
+    }
+
     const isWindows = process.platform === 'win32';
 
     return spawn(command, args, {
         cwd,
         stdio: "inherit",
         shell: isWindows,
-        env: {
-            ...process.env,
-            PATH: newPath
-        }
+        env
     });
 }
 
