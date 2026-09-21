@@ -1,6 +1,6 @@
 {
   "name": "@create-scaf/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Scaffolding engine for create-scaf",
   "type": "module",
   "main": "./dist/index.js",
@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@create-scaf/template": "workspace:*",
+    "@inquirer/prompts": "^7.3.3",
     "ejs": "^3.1.10"
   },
   "devDependencies": {
